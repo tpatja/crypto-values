@@ -1,0 +1,40 @@
+[package]
+name = "crypto-values"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "native-tls-vendored"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+google-sheets4 = "4"
+tokio = { version = "^1.0", features = [ "macros", "full" ] }
+hyper = "0.14.23"
+hyper-rustls = "0.23.2"
+chrono = "0.4"
+dotenv = "0.15.0"
+clap = {version = "4", features = ["derive"], optional = true}
+clap_complete = { version = "4", optional = true}
+lambda_runtime = { version = "0.7", optional = true }
+
+# https://stackoverflow.com/questions/35711044/how-can-i-specify-binary-only-dependencies
+[features]
+cli = ["clap", "clap_complete"]
+aws-lambda = ["lambda_runtime" ]
+
+[[bin]]
+name = "crypto-values"
+required-features = ["cli"]
+
+
+[[bin]]
+name = "lambda-handler"
+required-features = ["aws-lambda"]
+
+
+[profile.release]
+opt-level = 3
+strip = true
+debug = false
+codegen-units = 8
+lto = true
