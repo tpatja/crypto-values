@@ -78,7 +78,7 @@ EOF
 
   aws events put-rule --name ${FUNCTION_NAME}_scheduled \
     --role-arn "${ROLE_ARN}" \
-    --schedule-expression 'cron(0/5 * * * ? *)' --state ENABLED
+    --schedule-expression 'rate(5 minutes)' --state ENABLED
 
   RULE_ARN=$(aws events describe-rule --name ${FUNCTION_NAME}_scheduled \
     | jq .Arn | sed 's/"//g')
