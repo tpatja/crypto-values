@@ -94,6 +94,15 @@ pub async fn get_holdings_from_google_sheet(
     Ok(res)
 }
 
+fn get_symbol_price(cmc_prices: &HashMap<String, f64>, symbol: &str) -> f64 {
+    let price = if symbol == "EUR" {
+        &1.0
+    } else {
+        cmc_prices.get(symbol).unwrap_or(&0.0)
+    };
+    *price
+}
+
 pub async fn get_updated_values(
     print_values: bool,
     update_gsheet: bool,
@@ -111,14 +120,14 @@ pub async fn get_updated_values(
         .collect();
     let cmc_prices = get_cmc_eur_prices(symbols).await?;
     let total = holdings.iter().fold(0.0, |acc, (k, v)| {
-        let price = cmc_prices.get(k).unwrap_or(&0.0);
+        let price = get_symbol_price(&cmc_prices, k);
         acc + (v * price)
     });
     if print_values {
         let mut holdings_vec: Vec<(&String, &f64)> = holdings.iter().collect();
         holdings_vec.sort_by(|a, b| a.0.cmp(b.0));
         for (symbol, amount) in holdings_vec {
-            let price = cmc_prices.get(symbol.as_str()).unwrap_or(&0.0);
+            let price = get_symbol_price(&cmc_prices, symbol);
             let value = amount * price;
             let pct: i8 = ((value / total) * 100.0) as i8;
             println!(
